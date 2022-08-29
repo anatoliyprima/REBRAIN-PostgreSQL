@@ -1,0 +1,240 @@
+Урок 2
+
+
+auto_install_db.sh
+
+#! /bin/bash
+
+sudo apt-get install wget ca-certificates -y
+wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" >> /etc/apt/sources.list.d/pgdg.list'
+sudo apt-get update
+sudo apt-get install postgresql-13
+sudo passwd postgres
+
+
+
+1. Установите postgresql v13 на VM c OS Ubuntu 20.04.
+
+Установка PostgreSQL на Ubuntu18
+
+sudo apt-get install wget ca-certificates
+wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+
+	Затем добавьте репозиторий PostgreSQL, набрав:
+sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" >> /etc/apt/sources.list.d/pgdg.list'
+
+	Обновите список пакетов:
+sudo apt-get update
+
+	Проверить доступные ревизии можно с помощью команды:
+apt-cache policy postgresql
+
+	установить определенную версию, в данном случае 13
+sudo apt-get install postgresql-13
+
+
+2. Добавьте в PostgreSQL пользователя root c правами SUPERUSER.
+
+sudo -u postgres createuser --interactive
+Enter name of role to add: root
+Shall the new role be a superuser? (y/n) y
+
+либо зайти из под пользователя postgres
+
+su - postgres
+createuser -s -l -W root
+
+либо зайти в саму БД и уже непосредственно в ней добавить пользователя
+
+CREATE ROLE root WITH SUPERUSER LOGIN PASSWORD ‘123’ ;
+
+
+3. Создайте базу данных "rebrain_courses_db".
+
+ postgres=# CREATE DATABASE rebrain_courses_db;
+psql
+проверить какие есть базы данных есть, можно командой
+
+postgres=# \l
+                                List of databases
+     Name      |  Owner   | Encoding | Collate |  Ctype  |   Access privileges
+---------------+----------+----------+---------+---------+-----------------------
+ postgres      | postgres | UTF8     | C.UTF-8 | C.UTF-8 |
+ rebrain_admin | postgres | UTF8     | C.UTF-8 | C.UTF-8 |
+ template0     | postgres | UTF8     | C.UTF-8 | C.UTF-8 | =c/postgres          +
+               |          |          |         |         | postgres=CTc/postgres
+ template1     | postgres | UTF8     | C.UTF-8 | C.UTF-8 | =c/postgres          +
+               |          |          |         |         | postgres=CTc/postgres
+
+
+4. Для работы с базой данных создайте пользователя "rebrain_admin".
+
+CREATE ROLE rebrain_admin WITH SUPERUSER LOGIN PASSWORD '123' ;
+
+5. Выдайте все права пользователю "rebrain_admin" на базу данных "rebrain_courses_db".
+
+GRANT ALL ON DATABASE rebrain_courses_db TO rebrain_admin;
+
+6. C помощью утилиты psql, подключитесь к базе данных "rebrain_courses_db"
+
+psql rebrain_courses_db
+
+
+7. Руководствуясь инструкцией к заданию, убедитесь, что таблица №1 и таблица №3 верно связаны по Foreign Key. Исправьте ошибку, если она есть.
+
+
+8. Руководствуясь инструкцией к заданию, убедитесь, что таблица №2 и таблица №3 верно связаны по Foreign Key. Исправьте ошибку, если она есть.
+
+9. Руководствуясь инструкцией к заданию, создайте необходимые таблицы, внесите в них исходные данные.
+Помните, что каждой таблице присвоен свой виртуальный номер, чтобы в дальнейшем проще понимать к какой таблице нужно обращаться.
+
+* Таблица №1. - users
+
+CREATE TABLE users(
+    user_id SERIAL PRIMARY KEY NOT NULL,    	        -- Primary Key
+    username varchar(50) NOT NULL,         		        -- Имя пользователя
+    email varchar(50) NOT NULL,                     	-- Электронная почта
+    mobile_phone varchar(12) NOT NULL,               	-- Номер телефона
+    firstname TEXT NOT NULL,                          -- Имя
+    lastname TEXT NOT NULL,                           -- Фамилия
+    city  TEXT,                                    		-- Название города
+    is_curator boolean NOT NULL,                     	-- Является ли пользователь куратором
+    record_date timestamp NOT NULL DEFAULT now()      -- Время создания записи о пользователе
+    );
+
+Исходные данные для Таблицы №1.
+
+INSERT INTO users(username,email,mobile_phone,firstname,lastname,city,is_curator)
+VALUES
+('admin','vasiliy_ozerov@mail.com','+79111937483','Vasiliy','Ozerov','Moscow','true'),
+('pricex','SimonWels@mail.com','+79111974384','Simon','Wels','London','false'),
+('MaytheForcebewithyou','Leya.Organa@newrepublic.com','+79991916526','Leya','Organa','Alderaan','false'),
+('yodajedi','magistr_yoda@oldrepublic.com','+79114326786','Yoda','Yodin','Dagoba','false'),
+('herion1','Sabur03@yandex.ru','+79110983475','Sabur','Gagiev','Kazan','false'),
+('pusha','Liliana_Sal@yandex.ru','+79115897438','Liliana','Salohina','SPB','false'),
+('vierjohn','xen_power@mail.com','+79112232134','John','Seltic','NULL','false'),
+('trakstars','Pronina@mail.ru','+79811987483','Varya','Pronina','Moscow','false'),
+('vozilla','Maxxx@mail.ru','+79111047854','Max','Visikov','NULL','false'),
+('Kisa007','Kisa007@mail.ru','+79112405972','Raya','Simonova','Tver','false'),
+('greenball','maike.greenball.vazovsky@corp.com','+79112425872','Mike','Vazovsky','Monstertown','false');
+
+
+
+* Таблица №2. - courses
+
+CREATE TABLE courses(
+    course_id SERIAL PRIMARY KEY NOT NULL,  	-- Primary Key
+    coursename varchar(50) NOT NULL,          -- Название практикума
+    tasks_count INT NOT NULL,              		-- Количество заданий в практикуме
+    price INT NOT NULL                 				-- Цена практикума
+    );
+
+
+Исходные данные для Таблицы №2.
+
+INSERT INTO courses(coursename,tasks_count,price)
+VALUES ('Kubernetes','70','35000'),
+('Highload' , '130' , '75000'),
+('Bash','15','6900'),
+('Golang','117','55000'),
+('Linux','102','65000'),
+('Devops','212','75000'),
+('Docker','45','30000'),
+('Logs','14','7900');
+
+
+* Таблица №3. - users__courses Не обращайте внимания в эталонных данных на текущее значение поля record_date в таблице №1,
+у вас автоматически проставится ваша текущая дата в формате timestamp на момент занесения.
+
+CREATE TABLE users__courses(
+    id SERIAL PRIMARY KEY NOT NULL,     		-- Primary Key
+    user_id INT NOT NULL,               		-- Foreign Key to table users
+    course_id INT NOT NULL,             		-- Foreign Key to table courses
+    CONSTRAINT fk_user_id
+        FOREIGN KEY (user_id)
+            REFERENCES users(user_id),
+    CONSTRAINT fk_course_id
+        FOREIGN KEY (course_id)
+            REFERENCES courses(course_id)
+    );
+
+Исходные данные для Таблицы №3.
+
+INSERT INTO users__courses(user_id, course_id)
+VALUES ( '1' , '1'),
+('1' , '4'),
+('3' , '2'),
+('3' , '4'),
+('2' , '6'),
+('2' , '1'),
+('2' , '2'),
+('2' , '4'),
+('5' , '6'),
+('6' , '6');
+
+10. Внесите информацию о новом пользователе в таблицу №1:
+INSERT INTO users(username,	email	mobile_phone	firstname	lastname	city	is_curator
+vladon	Vladislav.Pirushin@gmail.com	+79817937545	Vladislav	Pirushin	NULL	false
+
+INSERT INTO users(username,email,mobile_phone,firstname,lastname,city,is_curator)
+VALUES
+('vladon','Vladislav.Pirushin@gmail.com','+79817937545','Vladislav','Pirushin','NULL','false');
+
+
+11. Внесите информацию о новом курсе "Postgresql" в таблицу №2
+coursename	tasks_count	price
+Postgresql	14	7900
+
+INSERT INTO courses(coursename,tasks_count,price)
+VALUES ('Postgresql','14','7900');
+
+12. Внесите в таблицу №3 данные о том, что пользователь c номером мобильного телефона "+79991916526" купил практикум "Devops".
+
+INSERT INTO users__courses(user_id, course_id)
+VALUE
+('3','6');
+
+
+13. Получите все данные из таблицы №2 c информацией о курсах, результат сохраните в файл /tmp/answers/table2_courses_data.
+Для сохранения результата запроса в файл используйте запрос "COPY (SELECT..) TO /path/to/file CSV HEADER;",
+psql метакоманду "\o<\b> /path/to/file SELECT ... " или OS команду "psql -o /path/to/file".
+Проверяйте в выведенных данных наличие заголовков полей (это важно для успешного прохождения автопроверок).
+
+select * from courses;
+
+
+13. Получите из таблицы №1 список имен пользователей (username) и их мобильных номеров (mobile_phone),
+результат сохраните в файл /tmp/answers/table1_usernames_and_phones.
+
+SELECT username,mobile_phone FROM users ORDER BY username
+
+
+14. Удалите все данные из таблицы №1, связанные с именем пользователя "yodajedi".
+
+
+15. Обновите данные цены практикума в таблице №2 для практикума "Postgresql". Новая цена: 10000 тыс. руб.
+
+UPDATE courses SET price  = '10000' WHERE coursename = 'Postgresql' ;
+
+
+16. Обновите данные пользователя "Vladislav Pirushin" в таблице №1 указав, что он теперь является куратором.
+
+UPDATE users SET is_curator = 'true' WHERE firstname = 'Vladislav' AND lastname = 'Pirushin';
+
+17. Используя LEFT OUTER JOIN получите всю информацию (SELECT *) из таблицы №2 и таблицы №3, результат сохраните в файл /tmp/answers/
+
+
+18. LEFT_OUTER_JOIN в формате CSV с заголовками.
+
+
+19. Используя RIGHT OUTER JOIN получите всю информацию (SELECT *) из таблицы №1 и таблицы №3, результат сохраните в файл /tmp/answers/
+
+
+20. RIGHT_OUTER_JOIN в формате CSV с заголовками.
+
+
+21. Сделайте бэкап базы данных командой: pg_dump -U root rebrain_courses_db > rebrain_courses_db.sql.bqp
+
+
+22. Сохраните файл бэкапа базы данных rebrain_courses_db.sql.bqp к себе на компьютер для выполнения следующих заданий.

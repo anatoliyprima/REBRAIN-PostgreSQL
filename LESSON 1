@@ -1,0 +1,93 @@
+Урок 1
+
+
+Задание:
+
+!!! ВАЖНО !!! https://techglimpse.com/failed-metadata-repo-appstream-centos-8/
+
+ Перед работой с CentOS прочитать и выполнить следующие шаги:
+
+CentOS Linux 8 had reached the End Of Life (EOL) on December 31st, 2021. It means that CentOS 8 will no longer
+receive development resources from the official CentOS project. After Dec 31st, 2021, if you need to update your CentOS,
+you need to change the mirrors to vault.centos.org where they will be archived permanently. Alternatively, you may want to upgrade to CentOS Stream.
+
+Step 1: Go to the /etc/yum.repos.d/ directory.
+
+cd /etc/yum.repos.d/
+
+Step 2: Run the below commands
+
+sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+
+Step 3: Now run the yum update
+yum update -y
+
+
+!!! ПОСЛЕ ВЫПОЛНЕНИЯ ПРИСТУПАТЬ К РАБОТЕ !!!
+
+
+1. На сервер PostgreSQL-CentOS добавьте официальный репозиторий PostgreSQL и установите СУБД PostgreSQL версии 11. (Port 5432)
+
+	Установка PostgreSQL на CentOS
+
+	- Установите репозиторий RPM:
+sudo dnf install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+
+	- Отключаем встроенный PostgreSQL модуль:
+sudo dnf -qy module disable postgresql
+
+	- Чтобы установить сервер PostgreSQL, используйте следующую команду:
+sudo dnf install -y postgresql11-server
+
+	- Можете также проинициализировать базу данных и включить автозапуск:
+sudo /usr/pgsql-11/bin/postgresql-11-setup initdb
+sudo systemctl enable postgresql-11
+sudo systemctl start postgresql-11
+
+
+
+2. На сервере PostgreSQL-CentOS создайте пользователя для управления PostgreSQL с именем pgsqlcentos и правами Superuser.
+
+	- Давайте рассмотрим создание нового пользователя и подключение к серверу на примере. Введите следующие команды используя консоль ОС:
+	sudo -u postgres createuser --interactive
+	Введите имя новой роли: task01
+	Должна ли новая роль иметь полномочия суперпользователя? (y — да, n — нет) y
+
+sudo -u postgres createuser --interactive
+Enter name of role to add: pgsqlcentos
+Shall the new role be a superuser? (y/n) y
+
+
+3. На сервер PostgreSQL-Ubuntu18 добавьте официальный репозиторий PostgreSQL и установите СУБД PostgreSQL версии 12. (Port 5432)
+
+	Установка PostgreSQL на Ubuntu18
+
+sudo apt-get install wget ca-certificates
+wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+
+	Затем добавьте репозиторий PostgreSQL, набрав:
+sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" >> /etc/apt/sources.list.d/pgdg.list'
+
+	Обновите список пакетов:
+sudo apt-get update
+
+	Проверить доступные ревизии можно с помощью команды:
+apt-cache policy postgresql
+
+	установить определенную версию, в данном случае 11
+sudo apt-get install postgresql-11
+
+
+4. На сервере PostgreSQL-Ubuntu18 создайте пользователя для управления PostgreSQL с именем pgsqlubuntu18 и правами Superuser.
+
+sudo -u postgres createuser --interactive
+Enter name of role to add: pgsqlubuntu18
+Shall the new role be a superuser? (y/n) y
+
+
+5. На сервер PostgreSQL-Ubuntu20 установите СУБД PostgreSQL версии 13.1 из исходных кодов PostgreSQL по шагам из документации предварительно установив на сервере
+компилятор gcc (install build-essential). Проверьте наличие утилиты psql в директории /usr/local/pgsql/bin/. Если утилиты psql там нет,
+то переместите ее в указанную директорию. (Port 5432)
+
+6. На сервере PostgreSQL-Ubuntu20 создайте пользователя для управления PostgreSQL с именем pgsqlubuntu20 и правами Superuser.
